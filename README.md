@@ -53,6 +53,7 @@ Just like the `cycle consistency` we have tried in CycleGAN before, we have to a
 |<img src="./inputs/single-cycle.png" alt="drawing" width="250"/>|<img src="./inputs/bi-cycle-2.png" alt="drawing" width="250"/>|
 
 For fair comparions, we use the same testing image among all the methods.
+
 Input | Encoded | Style-B | Style-C | Style-D | Style-E | Style-F | Style-G |
 ---   | ---     | ---     | ---     | ---     | ---     | --- | --- |
 <img src="results/edges2shoes/input.jpg" alt="drawing" width="50"/> | <img src="outputs/bi/input_000_encoded.png" alt="drawing" width="50"/> | <img src="outputs/bi/input_000_random_sample01.png" alt="drawing" width="50" alt="drawing" width="50"/> | <img src="outputs/bi/input_000_random_sample02.png" alt="drawing" width="50"/> | <img src="outputs/bi/input_000_random_sample03.png" alt="drawing" width="50"/> | <img src="outputs/bi/input_000_random_sample04.png" alt="drawing" width="50"/> | <img src="outputs/bi/input_000_random_sample05.png" alt="drawing" width="50"/> | <img src="outputs/bi/input_000_random_sample06.png" alt="drawing" width="50"/> | <img src="outputs/bi/input_000_random_sample07.png" alt="drawing" width="50"/> | <img src="outputs/bi/input_000_random_sample08.png" alt="drawing" width="50"/> | <img src="outputs/bi/input_000_random_sample09.png" alt="drawing" width="50"/> |
