@@ -1,96 +1,63 @@
 # Homework 2 (Style-Transfer)
 
-## Assign
+## Training MUNIT
 
-1.  10% (Training MUNIT)
-2.  20% (Inference one image in multiple style)
-3.  20% (Compare with other method)
-4.  30% (Assistant) 
-5.  20% (Mutual evaluation)
-
-reference:
-
-[FastPhotoStyle](https://github.com/NVIDIA/FastPhotoStyle)
-
-[neural-style](https://github.com/anishathalye/neural-style)
-
-[DRIT](https://github.com/HsinYingLee/DRIT)
-
-
-
-### Code usage
-
+For training, we use the default demo config:
 ```
-conda install pytorch=0.4.1 torchvision cuda91 -c pytorch;
-conda install -y -c anaconda pip;
-conda install -y -c anaconda pyyaml;
-pip install tensorboard tensorboardX;
+bash scripts/demo_train_summer2winter_yosemite256.sh
 ```
+In this assignment, we use the `summer2winter_yosemite256` dataset (not the HD version), which is introduced in the UNIT paper. Which contains summer and winter street images extracted from real-world driving videos.
 
-## Training
-### 1. Download dataset
+We show the tensorboard logging of the overall discriminator loss and generator loss below as an evidence of our training process (540k iter.).
 
-- `bash scripts/demo_train_edges2handbags.sh`  
-- `bash scripts/demo_train_edges2shoes.sh` 
-- `bash scripts/demo_train_summer2winter_yosemite256.sh` 
+D-Loss | G-Loss |
+---    | ---  |
+<img src="logs/summer2winter_yosemite256_folder/loss_dis.png" alt="drawing" width="250"/> | <img src="logs/summer2winter_yosemite256_folder/loss_gen.png" alt="drawing" width="250"/> |
 
-If you can not use ```axel``` command, change it to ```wget```.
 
-```
-axel -n 1 https://people.eecs.berkeley.edu/~taesung_park/CycleGAN/datasets/summer2winter_yosemite.zip --output=datasets/summer2winter_yosemite256/summer2winter_yosemite.zip
-```
-to
-
-```
-wget -N  https://people.eecs.berkeley.edu/~taesung_park/CycleGAN/datasets/summer2winter_yosemite.zip -O datasets/summer2winter_yosemite256/summer2winter_yosemite.zip
-```
-
-### 2. Train
-Check out ```configs/demo_edges2handbags_folder.yaml``` for folder-based dataset organization. 
-
-```
-python train.py --config configs/edges2handbags_folder.yaml
-```
+iter. | Summer → Winter|
+---    | ---  |
+10k   | <img src="outputs/summer2winter_yosemite256_folder/images/gen_a2b_test_00010000.jpg" alt="drawing" /> |
+20k   | <img src="outputs/summer2winter_yosemite256_folder/images/gen_a2b_test_00020000.jpg" alt="drawing" /> |
+30k   | <img src="outputs/summer2winter_yosemite256_folder/images/gen_a2b_test_00030000.jpg" alt="drawing" /> |
+110k  | <img src="outputs/summer2winter_yosemite256_folder/images/gen_a2b_test_00110000.jpg" alt="drawing" /> |
+120k  | <img src="outputs/summer2winter_yosemite256_folder/images/gen_a2b_test_00120000.jpg" alt="drawing" /> |
+130k  | <img src="outputs/summer2winter_yosemite256_folder/images/gen_a2b_test_00130000.jpg" alt="drawing" /> |
+310k  | <img src="outputs/summer2winter_yosemite256_folder/images/gen_a2b_test_00310000.jpg" alt="drawing" /> |
+320k  | <img src="outputs/summer2winter_yosemite256_folder/images/gen_a2b_test_00320000.jpg" alt="drawing" /> |
+330k  | <img src="outputs/summer2winter_yosemite256_folder/images/gen_a2b_test_00330000.jpg" alt="drawing" /> |
+540k  | <img src="outputs/summer2winter_yosemite256_folder/images/gen_a2b_test_00540000.jpg" alt="drawing" /> |
 
 
 
-## Testing
+## Inference one image in multiple style
 
-The pre-trained file is on [model](https://drive.google.com/drive/folders/10IEa7gibOWmQQuJUIUOkh-CV4cm6k8__?usp=sharing) Download the file and save it on  ```models/edges2shoes.pt```
-
-Run the following command to translate edges to shoes
-
-    python test.py --config configs/edges2shoes_folder.yaml --input inputs/edges2shoes_edge.jpg --output_folder results/edges2shoes --checkpoint models/edges2shoes.pt --a2b 1
-    
-The results are stored in `results/edges2shoes` folder. By default, it produces 10 random translation outputs.
+Input | Style-A | Style-B | Style-C | Style-D | Style-E | Style-F | Style-G |
+---   | ---     | ---     | ---     | ---     | ---     | --- | --- |
+<img src="results/edges2shoes/input.jpg" alt="drawing" width="50"/> | <img src="results/edges2shoes/output000.jpg" alt="drawing" width="50"/> | <img src="results/edges2shoes/output001.jpg" alt="drawing" width="50"/> | <img src="results/edges2shoes/output002.jpg" alt="drawing" width="50"/> | <img src="results/edges2shoes/output003.jpg" alt="drawing" width="50"/> | <img src="results/edges2shoes/output004.jpg" alt="drawing" width="50"/> | <img src="results/edges2shoes/output005.jpg" alt="drawing" width="50"/> | <img src="results/edges2shoes/output006.jpg" alt="drawing" width="50"/> | <img src="results/edges2shoes/output007.jpg" alt="drawing" width="50"/> | <img src="results/edges2shoes/output008.jpg" alt="drawing" width="50"/> | <img src="results/edges2shoes/output009.jpg" alt="drawing" width="50"/> |
 
 
+## Compare without other method
 
-### Results Video
+We compare the result one CVPR'17 paper, pix2pix. Pix2Pix can only do one → one mapping.
 
-This result is from original Github.
-[![](results/video.jpg)](https://youtu.be/ab64TWzWn40)
+Input | Style-A |
+---   | ---     |
+<img src="results/edges2shoes/input.jpg" alt="drawing" width="50"/> | <img src="inputs/pix.png" alt="drawing" width="50"/> |
 
-### Edges to Shoes/handbags Translation
+Another paper BicycleGAN can solve this problem. 
+Just like the `cycle consistency` we have tried in CycleGAN before, we have to add constraints on the consistency of the shared domain (Which is domain `Y`). As the table shown below, BicycleGAN integrate the `xy_Backward` loss and `yz_Forward` loss together as our special `bi-cycle-loss`. So that shared domain `Y` keeps the transform between `X` to `Z` adversarial. 
 
-![](results/edges2shoes_handbags.jpg)
+| Separate Cycles | Joint Cycles |
+|:-----:|:---:|
+|<img src="./inputs/single-cycle.png" alt="drawing" width="250"/>|<img src="./inputs/bi-cycle-2.png" alt="drawing" width="250"/>|
 
-### Animal Image Translation
 
-![](results/animal.jpg)
 
-### Street Scene Translation
 
-![](results/street.jpg)
+Input | Encoded | Style-B | Style-C | Style-D | Style-E | Style-F | Style-G |
+---   | ---     | ---     | ---     | ---     | ---     | --- | --- |
+<img src="results/edges2shoes/input.jpg" alt="drawing" width="50"/> | <img src="outputs/bi/input_000_encoded.png" alt="drawing" width="50"/> | <img src="outputs/bi/input_000_random_sample01.png" alt="drawing" width="50" alt="drawing" width="50"/> | <img src="outputs/bi/input_000_random_sample02.png" alt="drawing" width="50"/> | <img src="outputs/bi/input_000_random_sample03.png" alt="drawing" width="50"/> | <img src="outputs/bi/input_000_random_sample04.png" alt="drawing" width="50"/> | <img src="outputs/bi/input_000_random_sample05.png" alt="drawing" width="50"/> | <img src="outputs/bi/input_000_random_sample06.png" alt="drawing" width="50"/> | <img src="outputs/bi/input_000_random_sample07.png" alt="drawing" width="50"/> | <img src="outputs/bi/input_000_random_sample08.png" alt="drawing" width="50"/> | <img src="outputs/bi/input_000_random_sample09.png" alt="drawing" width="50"/> |
 
-### Yosemite Summer to Winter Translation (HD)
 
-![](results/summer2winter_yosemite.jpg)
-
-### Example-guided Image Translation
-
-![](results/example_guided.jpg)
-
-## Acknowledgments
-Code is from [MUNIT](https://github.com/NVlabs/MUNIT). All credit goes to the authors of [MUNIT](https://arxiv.org/abs/1804.04732), Xun Huang, Ming-Yu Liu, Serge Belongie, Jan Kautz.
-
+We think the results generated by MUNIT clearly outperform the one generated by BicleGAN. Through recombining its `content code` with a random `style code` sampled from the style space of the target domain, MUNIT shows great advantage comparing to wither Pix2Pix or BicycleGAN.
